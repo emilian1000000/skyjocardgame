@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>SKYJO Online by emilian1000000</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <header>
+    </header>
+    <div class="hbox">
+        <div>
+          <form id="players" name="players"><!--filled in JS--></form>
+        </div>
+        <div>
+          <button class="gobutton" onclick="(() => begingame())()">PLAY</button>
+        </div>
+    </div>
+    <div class="hbox" id="gameboard"></div>
+    <!--
+      templates
+    -->
+    <template id="player-name">
+      <label>Player Name: </label>
+      <input id="playernames"></input><br/>
+    </template>
+    <template id="player-cards">
+      <table>
+        <thead>
+          <tr>
+            <td colspan="4" id="gbname">Player</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+          </tr>
+          <tr>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+          </tr>
+          <tr>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+            <td><button name="cardbutton">X</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </template>
+    <footer>
+      <hr/>
+      <p>Inspired by but not affiliated with a great card game <a href="https://magilano.eu/produkt/skyjo/">SKYJO by Magilano</a></p>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>

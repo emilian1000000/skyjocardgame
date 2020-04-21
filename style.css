@@ -1,0 +1,33 @@
+.hbox {
+  display: flex;
+}
+.gobutton {
+  margin: 30px;
+  padding: 40px;
+  font-size: xx-large;
+  /*text-transform: uppercase;*/
+  font-variant: small-caps;
+  background: chartreuse;
+}
+.altbackground {
+  background: lightgray;
+}
+thead {
+  color: darkblue;
+}
+.turn {
+  animation-direction: alternate;
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+  animation-name: turn;
+}
+@keyframes turn {
+  0% {background-color: white;}
+  50% {background-color: coral;}
+  100% {background-color: red;}
+}
+footer {
+  bottom: 0px;
+  font-size: x-small;
+  position: fixed;
+}
