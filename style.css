@@ -1,11 +1,11 @@
 .hbox {
+  max-width: 100%;
   display: flex;
 }
 .gobutton {
   margin: 30px;
   padding: 40px;
   font-size: xx-large;
-  /*text-transform: uppercase;*/
   font-variant: small-caps;
   background: chartreuse;
 }
@@ -30,4 +30,33 @@ footer {
   bottom: 0px;
   font-size: x-small;
   position: fixed;
+}
+.cardbutton {
+  margin: 4px;
+  padding: .2ch;
+  width: 2.4ch;
+  height: 4ch;
+  font-size: x-large;
+  background: linear-gradient(to bottom right, blue, aqua, green, yellow, red);
+}
+body {
+  font-size: large;
+}
+.gbname {
+  text-transform: capitalize;
+}
+.negativebg {
+  background: blue;
+}
+.zerobg {
+  background: aqua;
+}
+.onetwothreefourbg {
+  background: green;
+}
+.fivesixseveneightbg {
+  background: yellow;
+}
+.nineteneleventwelvebg {
+  background: red;
 }
