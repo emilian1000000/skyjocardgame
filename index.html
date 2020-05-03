@@ -18,6 +18,16 @@
         </div>
     </div>
     <div class="hbox" id="gameboard"></div>
+    <div>
+      <button class="cardbutton" id="deck"></button>
+      <button class="cardbutton" id="open-card"></button>
+    </div>
+    <div>
+    </div>
+    <footer>
+      <hr/>
+      <p>Based on but not affiliated with a great card game <a href="https://magilano.eu/produkt/skyjo/">SKYJO by Magilano</a></p>
+    </footer>
     <!--
       templates
     -->
@@ -29,35 +39,36 @@
       <table>
         <thead>
           <tr>
-            <td colspan="4" id="gbname">Player</td>
+            <td colspan="4"><span id="gbname" class="gbname">Player</span>
+            </td>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
           </tr>
           <tr>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
           </tr>
           <tr>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
-            <td><button name="cardbutton">X</button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+            <td><button class="cardbutton" name="cardbutton"></button></td>
+          </tr>
+          <tr>
+            <td colspan="4">Total points: <span id="totalpoints"></span></td>
           </tr>
         </tbody>
       </table>
     </template>
-    <footer>
-      <hr/>
-      <p>Inspired by but not affiliated with a great card game <a href="https://magilano.eu/produkt/skyjo/">SKYJO by Magilano</a></p>
-    </footer>
+    <script src="game.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
