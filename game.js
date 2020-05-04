@@ -1,4 +1,3 @@
-// Shuffle tool
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex;
   while (0 !== currentIndex) {
@@ -10,6 +9,7 @@ function shuffle(array) {
   }
   return array;
 }
+
 const cardbackgrounds = {
   "-2": "negativebg", 
   "-1": "negativebg", 
@@ -27,57 +27,69 @@ const cardbackgrounds = {
   11: "nineteneleventwelvebg",
   12: "nineteneleventwelvebg"
 };
+
 const fulldeck = [-2, -2, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12];
+
+const MAX_PLAYERS = 8;
+
 function Game(playernames) {
   console.log(`New SKYJO game with ${playernames.length} players`)
-  this.cards = fulldeck.slice();
+  this.cards = fulldeck.slice(); // copy
   shuffle(this.cards);
   this.playernames = playernames.slice();
   shuffle(this.playernames);
+  this.playerscards = this.playernames.map(_ => []); // empty array for each player
+  this.opencards = [];
+  this.move = 0; // increases after every open card
 }
 Game.prototype = {
-  dealcards: function() {
-    this.playerscards = [];
+  deal_cards: function() {
     for (let i = 0; i < 12; i++) {
       for (let j in this.playernames) {
-        if (i == 0)
-          this.playerscards[j] = [];
         this.playerscards[j].push({
           card: this.cards.pop(), 
           open: false
         });
       }
     };
-    this.opencards = [this.cards.pop()];
+    this.opencards.push(this.cards.pop());
   },
-  player_cards_open: function (playerIndex) {
-    return this.playerscards[playerIndex].reduce(
+  player_cards_open: function (player_index) {
+    return this.playerscards[player_index].reduce(
       (sum, item) => item.open ? sum + 1 : sum, 0
     );
   },
-  player_points: function (playerIndex) {
-    return this.playerscards[playerIndex].reduce(
+  player_points: function (player_index) {
+    return this.playerscards[player_index].reduce(
       (sum, item) => item.open ? sum + item.card : sum, 0
     );
   },
   last_open: function () {
-    return this.opencards[this.opencards.length - 1].toString();
+    return this.opencards[this.opencards.length - 1];
   },
-  open_if_closed: function (playerIndex, cardIndex) {
-    if (this.playerscards[playerIndex][cardIndex].open)
+  open_if_closed: function (player_index, card_index) {
+    if (this.playerscards[player_index][card_index].open)
       return false;
 
-    this.playerscards[playerIndex][cardIndex].open = true;
+    ++this.move;
+    this.playerscards[player_index][card_index].open = true;
     return true;
   },
-  player_card: function (playerIndex, cardIndex) {
-    return this.playerscards[playerIndex][cardIndex].card.toString()
+  player_card: function (player_index, card_index) {
+    return this.playerscards[player_index][card_index].card;
   },
   is_debut_complete: function () {
-    for (i in this.playerscards) {
-      if (player_cards_open(i) != 2) 
+    // every player has at least two open cards
+    return this.move == 2 * this.playernames.length;
+    /*
+    for (player_index in this.playerscards)
+      if (this.player_cards_open(player_index) < 2) 
         return false;
-    }
+
     return true;
+    */
+  },
+  current_player: function() {
+    return this.move % this.playernames.length;
   }
 }
