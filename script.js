@@ -15,7 +15,6 @@ for (let i = 0; i < MAX_PLAYERS; i++) {
 
 var gAmE = null;
 var pick = null;
-var endspieler_index = null;
 var phases = [
   /*
      DEBUT
@@ -63,15 +62,12 @@ var phases = [
   {
     finish: function() {
       // next turn already advanced to the player
-      if (12 == gAmE.player_cards_open(gAmE.previous_player())) {
-        endspieler_index = gAmE.previous_player()
+      if (gAmE.is_last_round())
         endspiel_notifier.classList.remove("invisible"); // show
-      }
 
       if (!gAmE.is_mittelspiel_complete())
         return false;
 
-      //update_player(gAmE.current_player(), false);
       gAmE.open_all_cards(); // change all cards to val open
       gAmE.forEachPlayer((name, points, cards, player_index) => {
         update_player(player_index, false, points);

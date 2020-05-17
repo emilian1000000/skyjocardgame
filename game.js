@@ -41,6 +41,7 @@ function Game(playernames) {
   this.playerscards = this.playernames.map(_ => []); // empty array for each player
   this.opencards = [];
   this.move = 0; // increases after every open card
+  this.ending_move = null;
 }
 Game.prototype = {
   deal_cards: function() {
@@ -68,8 +69,11 @@ Game.prototype = {
     return this.opencards[this.opencards.length - 1];
   },
   _open_card: function (player_index, card_index) {
-    ++this.move;
     this.playerscards[player_index][card_index].open = true;
+    if (this.playerscards[player_index].length == this.player_cards_open(player_index))
+      this.ending_move = this.move;
+
+    ++this.move;
   },
   open_if_closed: function (player_index, card_index) {
     if (this.playerscards[player_index][card_index].open)
@@ -93,16 +97,12 @@ Game.prototype = {
   is_debut_complete: function () {
     // every player has at least two open cards
     return this.move == 2 * this.playernames.length;
-    /*
-    for (player_index in this.playerscards)
-      if (this.player_cards_open(player_index) < 2) 
-        return false;
-
-    return true;
-    */
+  },
+  is_last_round: function () {
+    return this.ending_move != null;
   },
   is_mittelspiel_complete: function () {
-    return this.player_cards_open(this.current_player()) == 12;
+    return this.ending_move != null && this.move - this.ending_move == this.playernames.length;
   },
   current_player: function () {
     return this.move % this.playernames.length;
@@ -121,10 +121,26 @@ Game.prototype = {
     this.opencards.push(card);
   },
   forEachPlayer: function(callback) {
+    // for now, do final score calculation here
+    const allpoints = this.playerscards.map((_, player_index) => this.player_points(player_index));
+    if (this.ending_move != null) {
+      const ender = this.ending_move % this.playernames.length;
+      /*
+        The first player to open all cards keeps their total only if 
+        it is the lowest and no other player has the same or lower 
+        total
+      */
+      if (allpoints.some((points, player_index) => player_index != ender && points <= allpoints[ender])) {
+        console.log(`Player ${ender} doubles total (oOfIeS)`);
+        allpoints[ender] *= 2;
+      }
+    }
+
+    // invoke callback
     this.playerscards.forEach((player_cards, player_index) => {
       callback(
         this.playernames[player_index],
-        this.player_points(player_index),
+        allpoints[player_index],
         player_cards.map(i => i.open ? i.card : null),
         player_index
       )
