@@ -10,19 +10,18 @@
     <header>
     </header>
     <div class="hbox">
-        <div>
-          <form id="players" name="players"><!--filled in JS--></form>
-        </div>
-        <div>
-          <button class="gobutton" id="new-game">PLAY</button>
-        </div>
+      <div>
+        <form id="players-form" name="players"><!--filled in JS--></form>
+      </div>
+      <div>
+        <button class="gobutton" id="new-game">PLAY</button>
+      </div>
     </div>
+    <div id="endspielnotifier" class="banner invisible">TAKE YOUR LAST MOVE (other than the player who just moved)</div>
     <div class="hbox" id="gameboard"></div>
-    <div>
-      <button class="cardbutton" id="deck"></button>
-      <button class="cardbutton" id="open-card"></button>
-    </div>
-    <div>
+    <div class="hbox">
+      <div><button class="cardbutton" id="deck"></button></div>
+      <div><button class="cardbutton" id="open-card"></button></div>
     </div>
     <footer>
       <hr/>

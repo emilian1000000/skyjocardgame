@@ -2,19 +2,23 @@ const templates = {
   playername: document.getElementById("player-name"),
   playercards: document.getElementById("player-cards")
 };
-const players = document.getElementById("players");
+const players_form = document.getElementById("players-form");
 const gameboard = document.getElementById("gameboard");
 const new_game = document.getElementById("new-game");
 const deck = document.getElementById("deck");
 const open_card = document.getElementById("open-card");
+const endspiel_notifier = document.getElementById("endspielnotifier")
 for (let i = 0; i < MAX_PLAYERS; i++) {
   const clone = templates.playername.content.cloneNode(true);
-  players.appendChild(clone);
+  players_form.appendChild(clone);
 }
 
 var gAmE = null;
+var pick = null;
+var endspieler_index = null;
 var phases = [
   /*
+     DEBUT
      Players are expected to open two cards each
   */
   {
@@ -52,47 +56,83 @@ var phases = [
     }
   },
   /*
-     Players take turns until one opens their cards
+     MITTELSPIEL & ENDSPIEL
+     Mittelspiel: Players take turns until one opens all their cards
+     Endspiel: All players take one last turn and at the end open all their cards
   */
   {
     finish: function() {
-      return false;
+      // next turn already advanced to the player
+      if (12 == gAmE.player_cards_open(gAmE.previous_player())) {
+        endspieler_index = gAmE.previous_player()
+        endspiel_notifier.classList.remove("invisible"); // show
+      }
+
+      if (!gAmE.is_mittelspiel_complete())
+        return false;
+
+      //update_player(gAmE.current_player(), false);
+      gAmE.open_all_cards(); // change all cards to val open
+      gAmE.forEachPlayer((name, points, cards, player_index) => {
+        update_player(player_index, false, points);
+        _card_buttons(_player_board(player_index)).forEach((card_button, card_index) =>
+          show_card_on_button(card_button, cards[card_index])
+        );
+      });
+      endspiel_notifier.classList.add("invisible"); // hide again
+      return true;
     },
     click_new_game: function() {
       // game in progress
     },
     click_player_card: function(player_index, card_index) {
-      // pass
+      if (gAmE.current_player() != player_index) {
+        alert("pLeAsE wAiT fOr YoUr TuRn");
+        return;
+      }
+      if (pick) {
+        const question = `Press OK to swap the card with the open card ${gAmE.last_open()} or Cancel to open the card`;
+        const swap = 
+          pick == "open"
+          || gAmE.is_card_open(player_index, card_index)
+          || confirm(question);
+        if (swap) {
+          gAmE.swap_with_open(player_index, card_index);
+          show_card_on_button(open_card, gAmE.last_open());
+        }
+        else
+          gAmE.open_if_closed(player_index, card_index);
+
+        // Update player's button
+        update_player(
+          player_index,
+          false,
+          gAmE.player_points(player_index),
+          card_index,
+          gAmE.player_card(player_index, card_index)
+        );
+        update_player(gAmE.current_player(), true);
+        open_card.classList.remove("cardpicked");
+        pick = null;
+      }
     },
     click_deck_card: function() {
-
+      if (!pick) {
+        gAmE.deck_to_open();
+        show_card_on_button(open_card, gAmE.last_open());
+        //open_card.classList.add("cardpicked");
+        pick = "deck";
+      }
     },
     click_open_card: function() {
-
+      // no need to check if "pick" is set, player chose this card
+      open_card.classList.add("cardpicked");
+      pick = "open";
     }
   },
   /*
-     Remaining players take last turn
-  */
-  {
-    finish: function() {
-      return false;
-    },
-    click_new_game: function() {
-      // game in progress
-    },
-    click_player_card: function(player_index, card_index) {
-
-    },
-    click_deck_card: function() {
-
-    },
-    click_open_card: function() {
-
-    }
-  },
-  /*
-     Players observe cards/scores and may play again
+     DATA COLLECTION & GAME RESTART
+     We collect point data and restart the game w/ points in mind
   */
   {
     finish: function() {
@@ -124,7 +164,9 @@ function maybe_next_phase() {
     // don't ever allow phases[phase_index] to be invalid
     next = phase_index + 1;
     console.log(`phase ${phase_index} -> ${next}`);
-    if (phases.length <= next) {
+    if (next < phases.length)
+      phase_index = next;
+    else {
       phase_index = 0;
       // auto-start next game to avoid requiring that button to be played twice
       phases[phase_index].click_new_game();
@@ -161,6 +203,14 @@ new_game.onclick = on_click_new_game;
    Helpful functions
 */
 
+function _player_board(player_index) {
+  return document.getElementById(`board${player_index}`);
+}
+
+function _card_buttons(player_board) {
+  return player_board.querySelectorAll("button[name='cardbutton']");
+}
+
 function update_player(player_index, current, points, card_index, card_value) {
   console.log(`update_player: ${current ? "!" : "#"}${player_index} has ${points} [${card_index}]=${card_value}`);
 
@@ -168,11 +218,11 @@ function update_player(player_index, current, points, card_index, card_value) {
     document.getElementById(`totalpoints${player_index}`).textContent = points.toString();
   }
 
-  const playerboard = document.getElementById(`board${player_index}`);
-  playerboard.classList.value = `${player_index % 2 == 1 ? "altbackground" : ""} ${current ? "turn" : ""}`;
+  const player_board = _player_board(player_index);
+  player_board.classList.value = `${player_index % 2 == 1 ? "altbackground" : ""} ${current ? "turn" : ""}`;
 
   if (card_index != undefined) {
-    const cardbutton = playerboard.querySelectorAll("button[name='cardbutton']")[card_index];
+    const cardbutton = _card_buttons(player_board)[card_index];
     show_card_on_button(cardbutton, card_value);
   }
 }

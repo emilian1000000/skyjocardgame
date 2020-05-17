@@ -23,8 +23,19 @@ thead {
 }
 @keyframes turn {
   0% {background-color: white;}
-  50% {background-color: coral;}
-  100% {background-color: red;}
+  50% {background-color: lightyellow;}
+  100% {background-color: yellow;}
+}
+.cardpicked {
+  animation-direction: alternate;
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+  animation-name: cardpicked;
+}
+@keyframes cardpicked {
+  0% {border-color: white;}
+  50% {border-color: lightgreen;}
+  100% {border-color: green;}
 }
 footer {
   bottom: 0px;
@@ -32,12 +43,14 @@ footer {
   position: fixed;
 }
 .cardbutton {
+  border: ridge;
   margin: 4px;
-  padding: .2ch;
-  width: 2.4ch;
-  height: 4ch;
+  padding: .1em;
+  width: 2em;
+  height: 3em;
   font-size: x-large;
   background: linear-gradient(to bottom right, blue, aqua, green, yellow, red);
+  text-align: center;
 }
 body {
   font-size: large;
@@ -45,18 +58,26 @@ body {
 .gbname {
   text-transform: capitalize;
 }
+.invisible {
+  visibility: hidden;
+}
+.banner {
+  background: tomato;
+  font-size: large;
+  padding: 1em;
+}
 .negativebg {
-  background: blue;
+  background: dodgerblue;
 }
 .zerobg {
   background: aqua;
 }
 .onetwothreefourbg {
-  background: green;
+  background: lightgreen;
 }
 .fivesixseveneightbg {
   background: yellow;
 }
 .nineteneleventwelvebg {
-  background: red;
+  background: tomato;
 }

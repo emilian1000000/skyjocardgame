@@ -67,13 +67,25 @@ Game.prototype = {
   last_open: function () {
     return this.opencards[this.opencards.length - 1];
   },
+  _open_card: function (player_index, card_index) {
+    ++this.move;
+    this.playerscards[player_index][card_index].open = true;
+  },
   open_if_closed: function (player_index, card_index) {
     if (this.playerscards[player_index][card_index].open)
       return false;
-
-    ++this.move;
-    this.playerscards[player_index][card_index].open = true;
+    this._open_card(player_index, card_index);
     return true;
+  },
+  is_card_open: function (player_index, card_index) {
+    return this.playerscards[player_index][card_index].open;
+  },
+  open_all_cards: function () {
+    for (player_index in this.playerscards) {
+      for (card_index in this.playerscards[player_index]) {
+        this.playerscards[player_index][card_index].open = true;
+      }
+    }
   },
   player_card: function (player_index, card_index) {
     return this.playerscards[player_index][card_index].card;
@@ -89,7 +101,33 @@ Game.prototype = {
     return true;
     */
   },
-  current_player: function() {
+  is_mittelspiel_complete: function () {
+    return this.player_cards_open(this.current_player()) == 12;
+  },
+  current_player: function () {
     return this.move % this.playernames.length;
+  },
+  previous_player: function () {
+    return (this.move - 1) % this.playernames.length;
+  },
+  deck_to_open: function () {
+    this.opencards.push(this.cards.pop());
+    console.log(`Deck (${this.cards.length}) to open (${this.opencards.length})`);
+  },
+  swap_with_open: function (player_index, card_index) {
+    const card = this.playerscards[player_index][card_index].card;
+    this.playerscards[player_index][card_index].card = this.opencards.pop();
+    this._open_card(player_index, card_index);
+    this.opencards.push(card);
+  },
+  forEachPlayer: function(callback) {
+    this.playerscards.forEach((player_cards, player_index) => {
+      callback(
+        this.playernames[player_index],
+        this.player_points(player_index),
+        player_cards.map(i => i.open ? i.card : null),
+        player_index
+      )
+    });
   }
 }
