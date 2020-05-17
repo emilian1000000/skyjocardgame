@@ -30,11 +30,11 @@ var phases = [
     },
     click_new_game: function() {
       gAmE = new Game(
-        Array.from(document.forms.players.playernames, input => input.value).filter(name => name != "")
+        Array.from(document.forms.players.playernames, input => input.value.trim()).filter(name => name != "")
       );
       gAmE.deal_cards();
       show_card_on_button(open_card, gAmE.last_open());
-      reset_board(gAmE.playernames);
+      reset_board(gAmE.player_names());
     },
     click_player_card: function(player_index, card_index) {
       if (gAmE.player_cards_open(player_index) < 2 && gAmE.open_if_closed(player_index, card_index)) {
@@ -227,6 +227,7 @@ function reset_board(player_names) {
   // clean up player boards
   while (gameboard.hasChildNodes())
     gameboard.removeChild(gameboard.firstChild);
+
   // add fresh player boards and bind new buttons
   player_names.forEach((name, i) => {
     const clone = templates.playercards.content.cloneNode(true);
