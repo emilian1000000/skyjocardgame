@@ -1,3 +1,5 @@
+'use strict';
+
 const templates = {
   playername: document.getElementById("player-name"),
   playercards: document.getElementById("player-cards")
@@ -15,6 +17,7 @@ for (let i = 0; i < MAX_PLAYERS; i++) {
 
 var gAmE = null;
 var pick = null;
+const score = {};
 var phases = [
   /*
      DEBUT
@@ -35,6 +38,18 @@ var phases = [
       gAmE.deal_cards();
       show_card_on_button(open_card, gAmE.last_open());
       reset_board(gAmE.player_names());
+
+      // TODO
+      fetch(
+        "https://www.optimaltec.com/game/sessions",
+        {
+          body: JSON.stringify({x: 5, y: 6}),
+          method: "POST",
+          mode: "cors"
+        }
+      ).then(response => {
+        console.log("got an answer", response.ok, response.status)
+      });
     },
     click_player_card: function(player_index, card_index) {
       if (gAmE.player_cards_open(player_index) < 2 && gAmE.open_if_closed(player_index, card_index)) {
@@ -70,6 +85,11 @@ var phases = [
 
       gAmE.open_all_cards(); // change all cards to val open
       gAmE.forEachPlayer((name, points, cards, player_index) => {
+        if (name in score)
+          score[name] += points;
+        else 
+          score[name] = points;
+
         update_player(player_index, false, points);
         _card_buttons(_player_board(player_index)).forEach((card_button, card_index) =>
           show_card_on_button(card_button, cards[card_index])
@@ -98,7 +118,7 @@ var phases = [
         }
         else
           gAmE.open_if_closed(player_index, card_index);
-
+        
         // Update player's button
         update_player(
           player_index,
@@ -107,6 +127,22 @@ var phases = [
           card_index,
           gAmE.player_card(player_index, card_index)
         );
+        
+        const column = gAmE.remove_three_in_a_column(player_index, card_index);
+        if (column != null) {
+          const tbody = _player_board(player_index).querySelector("tbody");
+          Array.from(tbody.rows).forEach((row, row_index) => {
+            if (row_index < 3)
+              row.deleteCell(column);
+          });
+          show_card_on_button(open_card, gAmE.last_open());
+          update_player(
+            player_index,
+            false,
+            gAmE.player_points(player_index)
+          );
+        }
+
         update_player(gAmE.current_player(), true);
         open_card.classList.remove("cardpicked");
         pick = null;
@@ -136,6 +172,7 @@ var phases = [
     },
     click_new_game: function() {
       // TODO update player standing
+      update_totalpoints(score);
       gAmE = null;
     },
     click_player_card: function(player_index, card_index) {
@@ -149,7 +186,7 @@ var phases = [
     }
   }
 ];
-phase_index = 0;
+var phase_index = 0;
 
 function phase() {
   return phases[phase_index];
@@ -158,7 +195,7 @@ function phase() {
 function maybe_next_phase() {
   if (phases[phase_index].finish()) {
     // don't ever allow phases[phase_index] to be invalid
-    next = phase_index + 1;
+    const next = phase_index + 1;
     console.log(`phase ${phase_index} -> ${next}`);
     if (next < phases.length)
       phase_index = next;
@@ -222,6 +259,17 @@ function update_player(player_index, current, points, card_index, card_value) {
     show_card_on_button(cardbutton, card_value);
   }
 }
+function update_totalpoints(scoremap) {
+  players_form.querySelectorAll('input').forEach(
+    (input, index, all_inputs) => {
+      if (index % 2 == 1) {
+        const name = all_inputs[index - 1].value.trim();
+        if (name != "") 
+          input.value = scoremap[name].toString();
+      }
+    }
+  );
+}
 
 function reset_board(player_names) {
   // clean up player boards
@@ -236,8 +284,16 @@ function reset_board(player_names) {
 
     const table = clone.querySelector("table");
     table.id = `board${i}`;
-    table.querySelectorAll("button[name='cardbutton']").forEach((card_button, j) => {
-      card_button.onclick = event => on_click_player_card(event, i, j);
+    _card_buttons(table).forEach((card_button, j) => {
+      card_button.onclick = event => {
+        const allbuttons = _card_buttons(table);
+        // find button that sent the event in the list
+        for (var index in allbuttons) {
+          if (allbuttons[index] == event.target)
+            break;
+        }
+        on_click_player_card(event, i, index);
+      }
     });
     gameboard.appendChild(clone);
     update_player(i, false);

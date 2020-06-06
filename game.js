@@ -1,3 +1,5 @@
+'use strict';
+
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex;
   while (0 !== currentIndex) {
@@ -33,15 +35,16 @@ const fulldeck = [-2, -2, -2, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 const MAX_PLAYERS = 8;
 
 function Player(name) {
-  console.log(`new SKYJO player: ${name}`)
+  console.log(`new SKYJO player: ${name}`);
   this.name = name;
   this.cards = [];
+  this.removed_cards = [];
 }
 Player.prototype = {
   deal_card: function(value) {
     this.cards.push({
       "value": value,
-      open: false
+      "open": false
     });
   },
   count_open: function() {
@@ -70,14 +73,34 @@ Player.prototype = {
     // dEsTrUcTuRiNg!
     [this.cards[card_index].value, value] = [value, this.cards[card_index].value];
     return value;
+  },
+  remove_column_maybe: function(card_index) {
+    const col_num = this.cards.length / 3;
+    const column = card_index % col_num;
+    if (!this.cards[column].open)
+      return null;
+
+    for (var index = column + col_num; index < this.cards.length; index += col_num) {
+      if (!this.cards[index].open || this.cards[index].value != this.cards[column].value)
+        return null;
+    }
+
+    console.log(`removing cards ${this.cards[column].value} in column ${column}`);
+    [2, 1, 0].forEach(
+      row_index => {
+        const deleted_cards = this.cards.splice(column + row_index * col_num, 1);
+        this.removed_cards.push(deleted_cards[0].value);
+      }
+    );
+    return column;
   }
 };
 
 function Game(playernames) {
-  console.log(`new SKYJO game with ${playernames.length} players`)
+  console.log(`New SKYJO game with ${playernames.length} players`);
   this.cards = fulldeck.slice(); // copy
   shuffle(this.cards);
-  names = playernames.slice(); // copy, just in case
+  const names = playernames.slice(); // copy, just in case
   shuffle(names);
   this.players = names.map(name => new Player(name));
   this.opencards = [];
@@ -104,7 +127,7 @@ Game.prototype = {
     return this.opencards[this.opencards.length - 1];
   },
   _open_card: function (player_index, card_index) {
-    if (this.players[player_index].open_one(card_index)) {
+    if (this.players[player_index].open_one(card_index) && this.ending_move == null) {
       console.log(`Player ${player_index} opened all cards on move ${this.move}`);
       this.ending_move = this.move;
     }
@@ -135,7 +158,7 @@ Game.prototype = {
     return this.ending_move != null;
   },
   is_mittelspiel_complete: function () {
-    return this.ending_move != null && this.move - this.ending_move == this.players.length;
+    return this.ending_move != null && this.move - this.ending_move >= this.players.length;
   },
   current_player: function () {
     return this.move % this.players.length;
@@ -157,13 +180,18 @@ Game.prototype = {
     if (this.ending_move != null) {
       const ender = this.ending_move % this.players.length;
       /*
-        The first player to open all cards keeps their total only if 
-        it is the lowest and no other player has the same or lower 
-        total
+        The first player to open all cards keeps their total 
+        only if it is the lowest and no other player has the 
+        same or lower total
       */
-      if (allpoints.some((points, player_index) => player_index != ender && points <= allpoints[ender])) {
-        console.log(`Player ${ender} doubles total (oOfIeS)`);
-        allpoints[ender] *= 2;
+      if (0 < allpoints[ender]) {
+        const somebody_has_same_or_lower_total = allpoints.some(
+          (points, player_index) => player_index != ender && points <= allpoints[ender]
+        );
+        if (somebody_has_same_or_lower_total) {
+          console.log(`Player ${ender} doubles total (oOfIeS)`);
+          allpoints[ender] *= 2;
+        }
       }
     }
 
@@ -176,5 +204,12 @@ Game.prototype = {
         player_index
       )
     });
+  },
+  remove_three_in_a_column: function (player_index, card_index) {
+    const column_number = this.players[player_index].remove_column_maybe(card_index);
+    if (column_number != null)
+      while (this.players[player_index].removed_cards.length)
+        this.opencards.push(this.players[player_index].removed_cards.shift());
+    return column_number;
   }
 }
